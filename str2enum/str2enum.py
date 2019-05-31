@@ -123,6 +123,12 @@ def generate_enum(config):
 
     print("} " + config.enum_name + ";")
 
+def generate_gperf(config):
+    for m in config.values:
+        print(m + ", " + config.enum_prefix + m)
+
+
+
 
 def handle_args():
     parser = argparse.ArgumentParser(prog="str2enum",
@@ -143,7 +149,7 @@ def handle_args():
     parser.add_argument("--unknown", default="UNK", help="Set the name of unknown element, default=%(default)s")
     parser.add_argument("--spaces", default=3, type=int,
                         help="Set spacing, default=%(default)s")
-    parser.add_argument("--str-mode", default="if", choices=["if", "strcmp", "operator", "map"],
+    parser.add_argument("--str-mode", default="if", choices=["if", "strcmp", "operator", "map", "gperf"],
                         help="set str -> enum conversion, default=%(default)s")
     parser.add_argument("values", nargs="+",
                         help="strings from which enum will be created")
@@ -154,6 +160,11 @@ def handle_args():
 if __name__ == "__main__":
     config = handle_args()
 
-    generate_enum(config)
-    print()
-    generate_str2enum(config)
+    if config.str_mode == "gperf":
+        generate_gperf(config)
+    else:
+        generate_enum(config)
+        print()
+        generate_str2enum(config)
+
+

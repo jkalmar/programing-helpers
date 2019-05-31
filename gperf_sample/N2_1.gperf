@@ -1,0 +1,56 @@
+%{
+/* gperf -tCG N2.gperf > N2.cpp */
+#include <stdio.h>
+#include <string.h>
+
+typedef enum
+{
+   E_PDU_RES_SETUP_REQ = 0,
+   E_PDU_RES_SETUP_RSP,
+   E_PDU_RES_SETUP_FAIL,
+   E_PDU_RES_REL_CMD,
+   E_PDU_RES_REL_RSP,
+   E_PDU_RES_MOD_REQ,
+   E_PDU_RES_MOD_RSP,
+   E_PDU_RES_MOD_FAIL,
+   E_PDU_RES_NTY,
+   E_PDU_RES_NTY_REL,
+   E_PDU_RES_MOD_IND,
+   E_PDU_RES_MOD_CFM,
+   E_PATH_SWITCH_REQ,
+   E_PATH_SWITCH_SETUP_FAIL,
+   E_PATH_SWITCH_REQ_ACK,
+   E_PATH_SWITCH_REQ_FAIL,
+   E_HANDOVER_REQUIRED,
+   E_HANDOVER_CMD,
+   E_HANDOVER_PREP_FAIL,
+   E_HANDOVER_REQ_ACK,
+   E_HANDOVER_RES_ALLOC_FAIL,
+   E_SRC_TO_TAR_CONTAINER,
+   E_TAR_TO_SRC_CONTAINER,
+   E_RAN_STATUS_TRANS_CONTAINER,
+   E_SON_CONFIG_TRANSFER,
+   E_NRPPA_PDU,
+   E_UE_RADIO_CAPABILITY,
+   E_UNK
+} ShinyEnum;
+
+
+struct TType {
+    const char *name;
+    ShinyEnum val;
+};
+%}
+
+%language=C++
+%define lookup-function-name Lookup
+%define class-name Functions
+struct TType
+%%
+####
+RAN_STATUS_TRANS_CONTAINER, E_RAN_STATUS_TRANS_CONTAINER
+SON_CONFIG_TRANSFER, E_SON_CONFIG_TRANSFER
+NRPPA_PDU, E_NRPPA_PDU
+UE_RADIO_CAPABILITY, hovad
+####
+%%

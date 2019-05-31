@@ -1,2 +1,2 @@
 default:
-	g++ -ggdb -O3 -o test main.cpp
+	g++ -ggdb -O3 -march=native -mtune=native  -o test main.cpp
