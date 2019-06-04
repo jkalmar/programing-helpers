@@ -11,23 +11,26 @@ class LineWrapRawTextHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
 
 def do_generate_if(config, current, level):
+    ret = []
+
     if "VAL" in current:
-        print((" "*level*config.spaces) + "if( size == " + str(level-1) + " ) return " +
-              config.enum_prefix + current["VAL"] + ";")
+        ret.append((" "*level*config.spaces) + "if( size == " + str(level-1) + " ) return " +
+            config.enum_prefix + current["VAL"] + ";")
 
     for k, v in current.items():
         if "VAL" == k:
             continue
 
-        print(" "*level*config.spaces, end="")
-        print("if( str[ " + str(level - 1) + " ] == '" + k + "' )")
-        print((" "*level*config.spaces) + "{")
+        ret.append(" "*level*config.spaces, end="")
+        ret.append("if( str[ " + str(level - 1) + " ] == '" + k + "' )")
+        ret.append((" "*level*config.spaces) + "{")
+        ret.extend(do_generate_if(config, v, level+1))
+        ret.append((" "*level*config.spaces) + "}")
 
-        do_generate_if(config, v, level+1)
-        print((" "*level*config.spaces) + "}")
-
+    return ret
 
 def generate_if(config):
+    ret = []
     cmptree = {}
     current = cmptree
 
@@ -43,15 +46,18 @@ def generate_if(config):
 
         current["VAL"] = m
 
-    print(config.enum_name + " str2" + config.enum_name + "( const char* str, size_t size )")
-    print("{")
-    do_generate_if(config, cmptree, 1)
-    print((" "*config.spaces) + "return " + config.enum_prefix + config.unknown + ";")
-    print("}")
+    ret.append(config.enum_name + " str2" + config.enum_name + "( const char* str, size_t size )")
+    ret.append("{")
+    ret.extend(do_generate_if(config, cmptree, 1))
+    ret.append((" "*config.spaces) + "return " + config.enum_prefix + config.unknown + ";")
+    ret.append("}")
+
+    return ret
 
 def generate_strcmp(config):
-    print(config.enum_name + " str2" + config.enum_name + "( const char* str, size_t size )")
-    print("{")
+    ret = []
+    ret.append(config.enum_name + " str2" + config.enum_name + "( const char* str, size_t size )")
+    ret.append("{")
 
     sizes = {}
 
@@ -67,20 +73,18 @@ def generate_strcmp(config):
 
     for size in keys:
         values = sizes[size]
-        print(" "*config.spaces, end="")
-        print("if( size == " + str(size) + " )")
-        print(" "*config.spaces, end="")
-        print("{")
+        ret.append(" "*config.spaces + "if( size == " + str(size) + " )")
+        ret.append(" "*config.spaces + "{")
         for val in values:
-            print(" "*config.spaces * 2, end="")
-            print('if( strncmp(str, "' + val + '", ' + str(size) + ') == 0 )', end="")
-            print(" return " + config.enum_prefix + val + ";")
+            ret.append(" "*config.spaces * 2 + 'if( strncmp(str, "' + val + '", ' + str(size) + ') == 0 )'
+                + " return " + config.enum_prefix + val + ";")
 
-        print(" "*config.spaces, end="")
-        print("}")
+        ret.append(" "*config.spaces + "}")
 
-    print((" "*config.spaces) + "return " + config.enum_prefix + config.unknown + ";")
-    print("}")
+    ret.append((" "*config.spaces) + "return " + config.enum_prefix + config.unknown + ";")
+    ret.append("}")
+
+    return ret
 
 def generate_operator(config):
     raise NotImplementedError("operator mode not implemented")
@@ -89,39 +93,48 @@ def generate_map(config):
     raise NotImplementedError("map mode not implemented")
 
 def generate_str2enum(config):
+    ret = []
+
     if config.only_enum:
         return
 
     if config.str_mode == "if":
-        generate_if(config)
+        ret = generate_if(config)
     elif config.str_mode == "strcmp":
-        generate_strcmp(config)
+        ret = generate_strcmp(config)
     elif config.str_mode == "operator":
         generate_operator(config)
     elif config.str_mode == "map":
         generate_map(config)
 
 
+    return ret
+
+
 def generate_enum(config):
+    ret = []
+
     if config.enum_mode == "class":
         raise NotImplementedError("class mode not implemented")
 
-    print("typedef enum")
-    print("{")
+    ret.append("typedef enum")
+    ret.append("{")
 
     first = True
 
     for m in config.values:
         if first:
-            print((" "*config.spaces) + config.enum_prefix +
+            ret.append((" "*config.spaces) + config.enum_prefix +
                   m + " = " + str(config.enum_start) + ",")
             first = False
         else:
-            print((" "*config.spaces) + config.enum_prefix + m + ",")
+            ret.append((" "*config.spaces) + config.enum_prefix + m + ",")
 
-    print((" "*config.spaces) + config.enum_prefix + config.unknown)
+    ret.append((" "*config.spaces) + config.enum_prefix + config.unknown)
 
-    print("} " + config.enum_name + ";")
+    ret.append("} " + config.enum_name + ";")
+
+    return ret
 
 def generate_gperf(config):
     for m in config.values:
@@ -163,8 +176,10 @@ if __name__ == "__main__":
     if config.str_mode == "gperf":
         generate_gperf(config)
     else:
-        generate_enum(config)
-        print()
-        generate_str2enum(config)
+        gen_enum = generate_enum(config)
+        gen_conv = generate_str2enum(config)
+
+        print("\n".join(gen_enum))
+        print("\n".join(gen_conv))
 
 
