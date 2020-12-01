@@ -1,0 +1,11 @@
+alias sl='ls'
+alias gd='git diff --color'
+alias gdw='git diff --color-words="\w+|\S"'
+alias gg='git log --graph --pretty=format:'\''%C(auto)%h%d %s %Cgreen%aN %Cblue%ar'\'''
+alias gga='git log --graph --pretty=format:'\''%C(auto)%h%d %s %Cgreen%aN %Cblue%ar'\'' --all'
+alias ggs='git log --graph --pretty=format:'\''%C(auto)%h%d %s %Cgreen%aN %Cblue%ar'\'' --simplify-by-decoration'
+alias grep='grep --color=auto'
+alias gs='git status'
+alias gsh='git show'
+
+alias sshsuper='echo "Configure your server ip here"'
