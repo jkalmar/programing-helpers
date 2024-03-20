@@ -14,3 +14,5 @@ alias gg30='git log --graph --pretty=format:'\''%C(auto)%h%d %s %Cgreen%aN %Cblu
 
 
 alias sshsuper='echo "Configure your server ip here"'
+
+alias psudo="sudo env \"PATH=$PATH\"".
